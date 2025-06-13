@@ -99,6 +99,50 @@
             outline: none;
         }
 
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-results-list {
+            padding: 1rem;
+        }
+
+        .search-results-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-results-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .search-loading, .search-no-results {
+            padding: 1rem;
+            text-align: center;
+            color: #666;
+            display: none;
+        }
+
+        .search-loading.show, .search-no-results.show {
+            display: block;
+        }
+
         .search-icon {
             position: absolute;
             left: 1rem;
@@ -778,6 +822,94 @@
             }
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const searchResultsList = searchResults.querySelector('.search-results-list');
+            const searchLoading = searchResults.querySelector('.search-loading');
+            const searchNoResults = searchResults.querySelector('.search-no-results');
+            const searchableElements = document.querySelectorAll('h1, h2, h3, p, a');
+            
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length < 2) {
+                    searchResults.classList.remove('show');
+                    return;
+                }
+                searchLoading.classList.add('show');
+                searchNoResults.classList.remove('show');
+                searchResultsList.innerHTML = '';
+                const results = [];
+                searchableElements.forEach(element => {
+                    if (element.textContent.toLowerCase().includes(searchTerm)) {
+                        const result = {
+                            element: element,
+                            text: element.textContent,
+                            href: element.tagName === 'A' ? element.href : window.location.href,
+                            section: null
+                        };
+                        let currentElement = element;
+                        while (currentElement && currentElement.tagName !== 'SECTION') {
+                            currentElement = currentElement.parentElement;
+                        }
+                        if (currentElement && currentElement.id) {
+                            result.section = currentElement.id;
+                        }
+
+                        results.push(result);
+                    }
+                });
+
+                // Update results
+                searchLoading.classList.remove('show');
+                if (results.length === 0) {
+                    searchNoResults.classList.add('show');
+                } else {
+                    results.forEach(result => {
+                        const item = document.createElement('div');
+                        item.className = 'search-results-item';
+                        item.innerHTML = `
+                            <span>${result.text}</span>
+                        `;
+                        item.addEventListener('click', () => {
+                            // If the result has a section, scroll to it
+                            if (result.section) {
+                                const section = document.getElementById(result.section);
+                                if (section) {
+                                    section.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            } else {
+                                // If it's an external link, navigate to it
+                                if (result.href !== window.location.href) {
+                                    window.location.href = result.href;
+                                }
+                            }
+                        });
+                        searchResultsList.appendChild(item);
+                    });
+                }
+
+                searchResults.classList.add('show');
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.remove('show');
+                }
+            });
+
+            // Handle keyboard navigation
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    searchResults.classList.remove('show');
+                    searchInput.value = '';
+                }
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -792,7 +924,12 @@
 
         <div class="search-container">
             <i data-lucide="search" class="search-icon"></i>
-            <input type="text" class="search-input" placeholder="Quick find">
+            <input type="text" class="search-input" placeholder="Quick find" id="searchInput">
+            <div class="search-results" id="searchResults">
+                <div class="search-loading">Searching...</div>
+                <div class="search-no-results">No results found</div>
+                <div class="search-results-list"></div>
+            </div>
         </div>
 
         <div class="nav-links">
@@ -829,10 +966,10 @@
                 <h2 class="hero-subtitle">MAG Minecraft Community</h2>
                 <div class="social-links">
                     <a href="https://www.youtube.com/@malluarenagaming" class="social-link">
-                        <i data-lucide="youtube" style="color: #FF0000; width: 24px; height: 24px;"></i>
+                        <i class="fa-brands fa-youtube" style="color: #FF0000; width: 24px; height: 24px;"></i>
                     </a>
                     <a href="https://www.instagram.com/malluarenagaming/" class="social-link">
-                        <i data-lucide="instagram" style="color: #E1306C; width: 24px; height: 24px;"></i>
+                        <i class="fa-brands fa-instagram"data-lucide="instagram" style="color: #E1306C; width: 24px; height: 24px;"></i>
                     </a>
                     <a href="https://discord.gg/j44xHBmXJk" class="social-link">
                         <i data-lucide="discord" style="color: #5865F2; width: 24px; height: 24px;"></i>
@@ -1107,7 +1244,7 @@
 
                 <div class="admin-card">
                     <div class="admin-avatar">
-                        <img src="images/profiles/akif.png" alt="Founder Avatar">
+                        <img src="images/profiles/mal.webp" alt="Founder Avatar">
                         <!-- Admin avatar will be added by user -->
                     </div>
                     <h3 class="admin-name">Akif Mohammed</h3>
@@ -1133,11 +1270,11 @@
 
                 <div class="admin-card">
                     <div class="admin-avatar">
-                        <img src="images/profiles/akash.png" alt="Head Of Staff Avatar">
+                        <img src="images/profiles/aksh.png.webp" alt="Community Management Avatar">
                         <!-- Admin avatar will be added by user -->
                     </div>
                     <h3 class="admin-name">Akash</h3>
-                    <p class="admin-role">Head Of Staff</p>
+                    <p class="admin-role">Community Management</p>
                     <p class="admin-bio">
                         Organizes events and manages community engagement Head of Moderation Department. Known for creating exciting tournaments and
                         building challenges.
@@ -1157,7 +1294,7 @@
 
                 <div class="admin-card">
                     <div class="admin-avatar">
-                        <img src="images/profiles/alone.png" alt="Network Manager Avatar">
+                        <img src="images/profiles/alone.webp" alt="Network Manager Avatar">
                     </div>
                     <h3 class="admin-name">Alone Lmao</h3>
                     <p class="admin-role">Network Manager</p>
@@ -1180,16 +1317,16 @@
                 <div>
                     <div class="admin-card">
                     <div class="admin-avatar">
-                    <img src="images/profiles/smaller.png" alt="Developer Avatar">
+                    <img src="images/profiles/smal.webp" alt="Developer Avatar">
                 </div>
                     <h3 class="admin-name">SmallerWhraf410</h3>
-                        <p class="admin-role">Developer</p>
+                        <p class="admin-role">Innovative Coordinator</p>
                         <p class="admin-bio">
-                            Minecraft Developer & Moderator,Ensures server rules are followed and helps new players get started. Always friendly and ready to assist with any questions <!--Rest will be added-->
+                            Minecraft Developer & Innovative Coordinator,Ensures server rules are followed and helps new players get started. Always friendly and ready to assist with any questions <!--Rest will be added-->
                         </p>
                         <p class="admin-social">
                             <a href="#" class="admin-social-link"
-                            <i data-lucide="instagram" style="width:18px;height:18px;color:#666"></i>
+                             <i class="fa-brands fa-instagram" data-lucide="instagram" style="width:18px;height:18px;color:#666"></i>
                             </a>
                         </p>
                     </h3>
@@ -1198,16 +1335,17 @@
                 <div>
                     <div class="admin-card">
                         <div class="admin-avatar">
-                        <img src="images/profiles/voltriczzz.png" alt="Mod image">
+                        <img src="images/profiles/volt.webp" alt="Mod image">
                         </div>
                         <h3 class="admin-name">Voltriczzz</h3>
                         <p class="admin-role">Moderator</p>
                         <p class="admin-bio">
-                           Discord Moderator & Ensures server rules are followed and helps new players get started
+                           Discord Moderator & Ensures server rules are followed and helps new players get started,over 2 years of expirence in moderating servers
                             </p>
                             <p class="admin-social">
-                                <a href="#" class="admin-social-link">
-                                    <i data-lucide="instagram" style="width:18px;height:18px;color:#666"></i>
+                                <a href="https://www.instagram.com/rittu_ignatious/" class="admin-social-link">
+                                    <i class="fa-brands fa-instagram"data-lucide="instagram" style="width:18px;height:18px;color:#666"></i>
+                                    
                                 </a>
                             </p>
 
