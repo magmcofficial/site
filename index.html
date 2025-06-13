@@ -457,10 +457,43 @@
 
         /* Admin Section */
         .admin-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: flex;
             gap: 2rem;
             margin-top: 2rem;
+            overflow-x: auto;
+            padding: 0 2rem;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .admin-card {
+            flex: 0 0 auto;
+            width: 250px;
+            scroll-snap-align: start;
+        }
+
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+        }
+
+        .admin-nav-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .admin-nav-btn:hover {
+            color: #fff;
+        }
+
+        .admin-cards::-webkit-scrollbar {
+            display: none;
         }
 
         .admin-card {
@@ -1034,7 +1067,23 @@
                 the best possible experience for our community.
             </p>
 
-            <div class="admin-cards">
+            <div class="admin-nav">
+                <button class="admin-nav-btn" id="prevBtn">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+                <button class="admin-nav-btn" id="nextBtn">
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+            <div class="admin-nav">
+                <button class="admin-nav-btn" id="prevBtn">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+                <button class="admin-nav-btn" id="nextBtn">
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+            <div class="admin-cards" id="adminCards">
                 <div class="admin-card">
                     <div class="admin-avatar">
                         <img src="images/profiles/ytshidan50.png" alt="Owner Avatar">
@@ -1147,10 +1196,58 @@
                     </h3>
                 </div>
                 </div>
+                <div>
+                    <div class="admin-card">
+                        <div class="admin-avatar">
+                        <img src="images/profiles/volt.webp" alt="Mod image">
+                        </div>
+                        <h3 class="admin-name">Voltriczzz</h3>
+                        <p class="admin-role">Moderator</p>
+                        <p class="admin-bio">
+                            Discord Moderator & Ensures server rules are followed and helps new players get started
+                            </p>
+                            <p class="admin-social">
+                                <a href="#" class="admin-social-link">
+                                    <i data-lucide="instagram" style="width:18px;height:18px;color:#666"></i>
+                                </a>
+                            </p>
+
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const adminCards = document.getElementById('adminCards');
 
+            let scrollPosition = 0;
+            const scrollAmount = 300; // Adjust this value to control scroll distance
+
+            prevBtn.addEventListener('click', () => {
+                scrollPosition -= scrollAmount;
+                if (scrollPosition < 0) scrollPosition = 0;
+                adminCards.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+            });
+
+            nextBtn.addEventListener('click', () => {
+                scrollPosition += scrollAmount;
+                const maxScroll = adminCards.scrollWidth - adminCards.clientWidth;
+                if (scrollPosition > maxScroll) scrollPosition = maxScroll;
+                adminCards.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
